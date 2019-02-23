@@ -22,10 +22,10 @@ func NewShader(source string, shaderType uint32) (Shader, error) {
 
 	shader := gl.CreateShader(shaderType)
 
-	csources, free := gl.Strs(source)
+	csources, free := gl.Strs(source + "\x00")
 	gl.ShaderSource(shader, 1, csources, nil)
-	free()
 	gl.CompileShader(shader)
+	free()
 
 	var status int32
 	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
@@ -46,4 +46,9 @@ func (s Shader)GetID() uint32	{ return uint32(s) }
 func (s Shader)Use()			{ log.Error("Shader #", s, " does nothing on Use") }
 func (s Shader)Deallocate()		{
 	gl.DeleteShader(uint32(s))
+}
+func DeallocateShaders(shaders ...Shader) {
+	for _, s :=  range shaders {
+		s.Deallocate()
+	}
 }

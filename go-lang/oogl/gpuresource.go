@@ -1,6 +1,6 @@
 package oogl
 
-type Resource interface {
+type GPUResource interface {
 
 	GetID() uint32
 	Deallocate()

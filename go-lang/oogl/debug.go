@@ -5,7 +5,13 @@ import "fmt"
 import "unsafe"
 import "github.com/go-gl/gl/v4.1-core/gl"
 
+import "github.com/Czaplicki/common/go-lang/console/color"
+
 import "runtime/debug"
+
+const (
+	RED = "\x00"
+)
 
 var sources map[uint32]string = map[uint32]string {
 
@@ -18,20 +24,20 @@ var sources map[uint32]string = map[uint32]string {
 }
 var types map[uint32]string = map[uint32]string {
 
-	gl.DEBUG_TYPE_ERROR					: "ERROR",
-	gl.DEBUG_TYPE_DEPRECATED_BEHAVIOR	: "DEPRECATED BEHAVIOR",
-	gl.DEBUG_TYPE_UNDEFINED_BEHAVIOR	: "UDEFINED BEHAVIOR",
-	gl.DEBUG_TYPE_PORTABILITY			: "PORTABILITY",
-	gl.DEBUG_TYPE_PERFORMANCE			: "PERFORMANCE",
-	gl.DEBUG_TYPE_OTHER					: "OTHER",
-	gl.DEBUG_TYPE_MARKER				: "MARKER",
+	gl.DEBUG_TYPE_ERROR					: color.Red			( "ERROR"				),
+	gl.DEBUG_TYPE_DEPRECATED_BEHAVIOR	: color.Magenta		( "DEPRECATED BEHAVIOR"	),
+	gl.DEBUG_TYPE_UNDEFINED_BEHAVIOR	: color.BrightRed	( "UDEFINED BEHAVIOR"	),
+	gl.DEBUG_TYPE_PORTABILITY			: color.Cyan		( "PORTABILITY"			),
+	gl.DEBUG_TYPE_PERFORMANCE			: color.Blue		( "PERFORMANCE"			),
+	gl.DEBUG_TYPE_OTHER					: color.Yellow		( "OTHER"				),
+	gl.DEBUG_TYPE_MARKER				: color.BrightBlue	( "MARKER"				),
 }
 var severitys map[uint32]string = map[uint32]string {
 
-	gl.DEBUG_SEVERITY_HIGH				: "HIGH",
-	gl.DEBUG_SEVERITY_MEDIUM			: "MEDIUM",
-	gl.DEBUG_SEVERITY_LOW				: "LOW",
-	gl.DEBUG_SEVERITY_NOTIFICATION		: "NOTIFICATION",
+	gl.DEBUG_SEVERITY_HIGH				: color.Red			( "HIGH"			),
+	gl.DEBUG_SEVERITY_MEDIUM			: color.BrightRed	( "MEDIUM"			),
+	gl.DEBUG_SEVERITY_LOW				: color.Yellow		( "LOW"				),
+	gl.DEBUG_SEVERITY_NOTIFICATION		: color.Blue 		( "NOTIFICATION"	),
 }
 
 var output io.Writer
@@ -46,18 +52,21 @@ func debugProc(	source	uint32	, gltype	uint32,
 				length	int32	, message	string,
 				userParam	unsafe.Pointer		) {
 
-	output.Write([]byte(fmt.Sprintf("%d: %s of %s severity, raised from %s: %s\n",
+	output.Write([]byte(fmt.Sprintf("\n%d: %s of %s severity,\n\traised from %s:\n\t %s\n\n",
 							id, types[gltype],
 							severitys[severity],
 							sources[source],
 							 message)))
-	//output.Write([]byte("\u001b[30m;1"))
-	output.Write([]byte(debug.Stack()))
-	//output.Write([]byte("\u001b[0m"))
-	fmt.Println([]byte(fmt.Sprintf("%d: %s of %s severity, raised from %s: %s\n",
+	if severity != gl.DEBUG_SEVERITY_NOTIFICATION {
+
+		output.Write([]byte("\u001b[30m;1"))
+		output.Write([]byte(debug.Stack()))
+		output.Write([]byte("\u001b[0m \n\n"))
+	}
+	/*fmt.Println([]byte(fmt.Sprintf("%d: %s of %s severity, raised from %s: %s\n",
 							id, types[gltype],
 							severitys[severity],
 							sources[source],
-							 message)))
+							 message))) */
 }
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!! READ how to set glDebugCallBack(func)!!!!!!!!!!!!!!!!!!!!!!!!
