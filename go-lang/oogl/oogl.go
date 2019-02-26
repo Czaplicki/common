@@ -16,6 +16,7 @@ var EnableVertexAttribArray func (index uint32) = gl.EnableVertexAttribArray
 var GetAttribLocation func (program uint32, name *uint8) int32 = gl.GetAttribLocation
 var VertexAttribPointer func (index uint32, size int32, xtype uint32, normalized bool, stride int32, pointer unsafe.Pointer) = gl.VertexAttribPointer
 
+var BindFragDataLocation func (program uint32, color uint32, name *uint8) = gl.BindFragDataLocation
 
 //Convertions
 var Ptr			func (data interface{})	unsafe.Pointer	= gl.Ptr

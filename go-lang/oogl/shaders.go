@@ -36,6 +36,7 @@ func NewShader(source string, shaderType uint32) (Shader, error) {
 		log := strings.Repeat("\x00", int(logLength+1))
 		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
 
+		gl.DeleteShader(shader)
 		return 0, fmt.Errorf("failed to compile %v: %v", source, log)
 	}
 

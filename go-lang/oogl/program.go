@@ -11,9 +11,15 @@ func (p Program)GetID() uint32 	{ return 			uint32(p)	}
 func (p Program)Use()			{ gl.UseProgram(	uint32(p) )	}
 func (p Program)Deallocate()	{ gl.DeleteProgram(	uint32(p) )	}
 
+
+func (p Program)BindFragDataLocation(colorIndex uint32, name string) {
+	glName	:= name + "\x00"
+	gl.BindFragDataLocation(uint32(p), colorIndex, gl.Str(glName))
+}
+
 func (p Program)GetAttributeLocation(name string) (uint32, error) {
-	ztName	:= name + "\x00"
-	index	:= gl.GetAttribLocation(p.GetID(), gl.Str(ztName))
+	glName	:= name + "\x00"
+	index	:= gl.GetAttribLocation(p.GetID(), gl.Str(glName))
 	if index < 0 { return 0, fmt.Errorf("Program: %v, doesn't contain any attribute named : %s", p, name) }
 	return uint32(index), nil
 }
@@ -24,7 +30,7 @@ func (p Program)GetUniform(name string) (Uniform, error) {
 	ul := gl.GetUniformLocation(uint32(p), gl.Str(glName))
 	var err error
 	if ul > -1 {
-		err = fmt.Errorf("Program: %v, doesn't contain any uniform named : %s", p, name)
+		err = fmt.Errorf("Program: %v, doesn't contain any uniform named : \"%s\" (%x)", p, name, glName)
 	}
 	return Uniform(ul), err
 }
@@ -51,7 +57,8 @@ func NewProgram(shaders ...Shader) (Program, error) {
 		log := strings.Repeat("\x00", int(logLength+1))
 		gl.GetProgramInfoLog(p, logLength, nil, gl.Str(log))
 
-		return 0, fmt.Errorf("failed to link program: %v", log)
+		gl.DeleteProgram(p)
+		return 0, fmt.Errorf("Failed to link program: %v", log)
 	}
 
 	for _, s := range shaders {
